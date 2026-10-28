@@ -1,16 +1,17 @@
 {
   "schema_version": 1,
   "benchmark": "MorphDemo (mac adaptation of v1.1)",
-  "measured_on": "NOT YET MEASURED - run tools/umgebung-messen.sh on the test Mac",
-  "note": "Values of the test machine. Runs and evaluation happen on this machine.",
+  "measured_on": "2026-10-28",
+  "note": "Measured values of the test machine. Runs and evaluation happen on this machine.",
   "host": {
-    "os": "macOS (version to be measured), arm64",
-    "cpu": "Apple M3 Max",
+    "os": "macOS 27.0.1 (26A434), arm64",
+    "kernel": "Darwin 27.0.0",
+    "cpu": "Apple M3 Max, 10 performance + 4 efficiency cores",
     "ram_gib": 96,
-    "gpu": "Apple M3 Max integrated GPU, unified memory"
+    "gpu": "Apple M3 Max, 30 GPU cores, unified memory"
   },
   "graphics_runtime": {
-    "metal": "Metal.framework, MetalKit.framework",
+    "metal": "Metal.framework, MetalKit.framework (Metal 4)",
     "opengl": "OpenGL.framework, OpenGL 4.1 core profile (deprecated by Apple, still shipped)",
     "vulkan": "not available (no MoltenVK installed)",
     "cuda": "not available",
@@ -18,7 +19,7 @@
   },
   "display": {
     "target": "1920x1080",
-    "actual": "to be measured"
+    "actual": "3440 x 1440 (UWQHD - Ultra-Wide Quad HD); 2560 x 1440 (QHD/WQHD - Wide Quad High Definition)"
   },
   "audio_runtime": {
     "server": "Core Audio",
@@ -30,9 +31,14 @@
     "rosetta": "not to be used"
   },
   "build_tools": {
-    "cc": "to be measured (Apple clang from Xcode Command Line Tools)",
-    "other": "to be measured (ld, codesign, otool, lipo, make, python3)",
-    "package_managers": "to be measured (Homebrew yes/no)"
+    "developer_dir": "/Library/Developer/CommandLineTools",
+    "cc": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+    "ld": "@(#)PROGRAM:ld PROJECT:ld-27037.1",
+    "python": "Python 3.9.6",
+    "make": "GNU Make 3.81",
+    "rust": "not installed",
+    "other": "codesign, otool, lipo, strip, xxd (system tools)",
+    "package_managers": "Homebrew >=4.3.0 is installed, but the build must work with the system tools and Command Line Tools above only. Do not install packages."
   },
   "limits": {
     "development_time": "none",

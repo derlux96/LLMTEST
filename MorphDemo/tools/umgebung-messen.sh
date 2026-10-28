@@ -66,7 +66,7 @@ cat > "$ziel" <<JSON
     "make": "$(esc "$mk")",
     "rust": "$(esc "$rust")",
     "other": "codesign, otool, lipo, strip, xxd (system tools)",
-    "package_managers": "Homebrew: $(esc "$brew"). Do not rely on it for the build unless it is installed."
+    "package_managers": "Homebrew: $(esc "$brew"). The build must work with the system tools and Command Line Tools above only. Do not install packages."
   },
   "limits": {
     "development_time": "none",

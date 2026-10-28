@@ -14,7 +14,7 @@ The final programs will be run on the following system:
 - Integrated Apple GPU, unified memory (96 GB)
 - Metal available; OpenGL 4.1 (deprecated by Apple, but still shipped) available
 - Audio output available through Core Audio (AudioToolbox / AudioUnit)
-- 1920×1080 render target: render at 1920×1080 pixels and show it full-screen on the main display (scaled to fit) or in a window; the built-in display uses Retina scaling, so a window of 1920×1080 points may not fit on screen
+- 1920×1080 render target: render at 1920×1080 pixels and show it full-screen on the main display (scaled to fit) or in a window; `ENVIRONMENT.json` lists the attached displays
 
 You may use system libraries and frameworks that are already present in the supplied environment (for example Cocoa/AppKit, Metal, MetalKit, OpenGL, CoreGraphics, CoreAudio, AudioToolbox, libSystem).
 
@@ -139,7 +139,7 @@ Produce:
 2. `morphdemo-16k`, exactly 16,384 bytes;
 3. `morphdemo-4k`, exactly 4,096 bytes;
 4. complete source code for all three executables;
-5. everything required to rebuild all three from source using the tools available in the supplied environment (do not assume Homebrew or other package managers unless `ENVIRONMENT.json` lists them);
+5. everything required to rebuild all three from source using the tools available in the supplied environment (the system tools and Xcode Command Line Tools listed in `ENVIRONMENT.json`; do not install packages, and do not depend on Homebrew even if it is present);
 6. a short `README.md` containing the exact build commands and a brief description of the implementation.
 
 Only the three final executable files are subject to their exact size requirements.

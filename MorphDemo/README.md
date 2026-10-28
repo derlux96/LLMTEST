@@ -77,9 +77,9 @@ und die Laufzeit prüfen. Nur ein oder zwei der drei Größen abzugeben gilt als
 
 ## Ablauf eines Laufs
 
-0. Einmalig: auf dem Mac `./tools/umgebung-messen.sh` ausführen. Das Skript misst
-   macOS-Version, Hardware und Build-Werkzeuge und schreibt `inputs/ENVIRONMENT.json` neu.
-   Danach committen, damit alle Modelle dieselbe Datei bekommen.
+0. `inputs/ENVIRONMENT.json` ist am 2026-10-28 auf dem Test-Mac gemessen. Nach einem
+   macOS- oder Werkzeug-Update `./tools/umgebung-messen.sh` neu ausführen und committen,
+   damit alle Modelle dieselbe Datei bekommen.
 1. Leeren Arbeitsordner anlegen und `prompt.txt`, `SPEC.md` und `ENVIRONMENT.json`
    aus `inputs/` hineinkopieren (nicht aus `inputs/original/`).
 2. Harness im Arbeitsordner starten und `prompt.txt` als einzigen Prompt schicken.
@@ -106,7 +106,7 @@ Anforderungen sind gleich.
 | Audio | PipeWire, ALSA, SDL | Core Audio, AudioToolbox |
 | Selbst entpacken | im Speicher oder anonyme In-Memory-Datei | nur im Speicher (z. B. `MAP_JIT`), nichts auf die Platte schreiben |
 | Anzeige | 1920×1080 | Rendern in 1920×1080 Pixeln, Vollbild skaliert oder als Fenster |
-| Build-Werkzeuge | gcc, Nix | Apple clang (Xcode Command Line Tools), kein Homebrew vorausgesetzt |
+| Build-Werkzeuge | gcc, Nix | Apple clang 21 (Xcode Command Line Tools), Python 3.9, Make 3.81; Homebrew ist da, darf aber nicht genutzt werden |
 
 Zwei Regeln sind ausdrücklicher als im Original, weil es auf dem Mac nahe liegt, sie zu umgehen:
 Systemfonts (Core Text, `NSString`-Zeichnen) gelten als Inhalt, MORPH muss also selbst
