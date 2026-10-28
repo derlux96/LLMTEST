@@ -24,7 +24,7 @@
 | Nr. | Prüfung | 64k | 16k | 4k |
 |---|---|---|---|---|
 | P1 | Exakte Größe | | | |
-| P2 | Natives ELF, kein Wrapper | | | |
+| P2 | Mach-O arm64, signiert, kein Wrapper | | | |
 | P3 | Startet ohne Eingabe, Bild und Ton | | | |
 | P4 | 50 bis 70 s, endet selbst | | | |
 | P5 | Escape beendet sauber | | | |

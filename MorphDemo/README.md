@@ -9,8 +9,10 @@ Echtzeit-Programme (Demos) zum Thema **FROM NOISE TO ORDER**, mit exakt
 - Benchmark: [TheMorpheus407/morphdemo-benchmark](https://github.com/TheMorpheus407/morphdemo-benchmark)
   von Cedric Mössner (The Morpheus), MIT-Lizenz
 - Übernommener Stand: Commit `60fc91c` vom 2026-10-27, Spezifikation v1.1 (2026-09-23)
-- Die Inputs liegen unverändert in [`inputs/`](inputs/), die Lizenz in
-  [`inputs/LICENSE-morphdemo-benchmark`](inputs/LICENSE-morphdemo-benchmark).
+- Die Original-Inputs liegen unverändert in [`inputs/original/`](inputs/original/),
+  mit Lizenz. Für unseren Test sind `SPEC.md` und `ENVIRONMENT.json` an den
+  Mac angepasst (siehe [Anpassung an den Mac](#anpassung-an-den-mac)). Unsere Ergebnisse
+  sind deshalb nicht 1:1 mit den Läufen im Original-Repo vergleichbar.
 - Im Original-Repo liegen fertige Läufe von Claude Opus 5.5, GPT-6 Astra,
   Claude Sonnet 5.5, GPT-6.1 Sol, Mistral Large 4, Gemini 4 Argon und
   Kimi K3.1 Pro. Die eignen sich als Vergleich für unsere Ergebnisse.
@@ -21,9 +23,12 @@ Jedes Modell bekommt genau diese drei Dateien in einen leeren Arbeitsordner:
 
 | Datei | Inhalt |
 |---|---|
-| [`inputs/prompt.txt`](inputs/prompt.txt) | Der Start-Prompt des Laufs (siehe unten) |
-| [`inputs/SPEC.md`](inputs/SPEC.md) | Die eigentliche Aufgabe (englisch) |
-| [`inputs/ENVIRONMENT.json`](inputs/ENVIRONMENT.json) | Gemessene Daten des Referenzrechners: OS, GPU, Grafik-, Audio- und Build-Werkzeuge |
+| [`inputs/prompt.txt`](inputs/prompt.txt) | Der Start-Prompt des Laufs, unverändert (siehe unten) |
+| [`inputs/SPEC.md`](inputs/SPEC.md) | Die Aufgabe (englisch), an macOS angepasst |
+| [`inputs/ENVIRONMENT.json`](inputs/ENVIRONMENT.json) | Daten des Test-Macs: OS, GPU, Grafik-, Audio- und Build-Werkzeuge |
+
+Die Sprache der Aufgabe bleibt Englisch wie im Original, damit Prompt und SPEC für
+alle Modelle gleich sind.
 
 ### Prompt
 
@@ -48,8 +53,9 @@ Die Größen sind exakte Dateigrößen, keine Obergrenzen. Auffüllen (Padding) 
 
 **Jedes der drei Programme muss für sich allein:**
 
-- ein natives Linux-Programm sein (kein Shell-Skript, kein Interpreter, kein Archiv, kein Launcher);
-  selbst entpackender Code ist erlaubt, wenn das Entpacken im Programm selbst passiert
+- ein natives macOS-arm64-Programm sein (Mach-O, signiert, kein `.app`-Bundle, kein Shell-Skript,
+  kein Interpreter, kein Archiv, kein Launcher); selbst entpackender Code ist erlaubt, wenn das
+  Entpacken im Programm selbst und im Speicher passiert
 - in Echtzeit rendern, mit durchgehender Animation
 - Audio oder Musik zur Laufzeit erzeugen, bewusst synchron zum Bild
 - eine erkennbare Entwicklung zeigen: **Entstehung** (chaotisch, verrauscht, minimal),
@@ -71,34 +77,56 @@ und die Laufzeit prüfen. Nur ein oder zwei der drei Größen abzugeben gilt als
 
 ## Ablauf eines Laufs
 
-1. Leeren Arbeitsordner anlegen und die drei Dateien aus `inputs/` hineinkopieren.
+0. Einmalig: auf dem Mac `./tools/umgebung-messen.sh` ausführen. Das Skript misst
+   macOS-Version, Hardware und Build-Werkzeuge und schreibt `inputs/ENVIRONMENT.json` neu.
+   Danach committen, damit alle Modelle dieselbe Datei bekommen.
+1. Leeren Arbeitsordner anlegen und `prompt.txt`, `SPEC.md` und `ENVIRONMENT.json`
+   aus `inputs/` hineinkopieren (nicht aus `inputs/original/`).
 2. Harness im Arbeitsordner starten und `prompt.txt` als einzigen Prompt schicken.
 3. Keine Hilfe und keine Rückfragen beantworten, das Modell arbeitet, bis es selbst fertig ist.
 4. Startzeit, Endzeit und, soweit der Harness sie liefert, Tokens und Durchsatz notieren.
 5. Den Arbeitsordner am Ende ohne Build-Ausgaben, Caches und Harness-Konfiguration
    (`.claude/`, `.codex/`, `.mcp.json`, ...) nach `ergebnisse/<Modellname>/workspace/` kopieren.
-6. Die drei Programme auf dem Zielsystem prüfen und `ergebnisse/<Modellname>/ERGEBNIS.md` ausfüllen.
+6. Die drei Programme auf dem Mac prüfen und `ergebnisse/<Modellname>/ERGEBNIS.md` ausfüllen.
 
-### Wichtig: Zielsystem
+## Anpassung an den Mac
 
-Die Aufgabe verlangt **native Linux-x86-64-Programme**, `ENVIRONMENT.json` beschreibt
-einen NixOS-Rechner mit RTX 5090. Unser Testsystem ist ein Mac M3 Max (ARM, macOS).
-Dort laufen die Programme nicht direkt. Für vergleichbare Ergebnisse muss der Lauf
-und die Prüfung auf einem Linux-x86-64-Rechner (oder einer passenden VM) passieren.
-Wer stattdessen auf dem Mac bauen lässt, ändert die Aufgabe und muss das in
-`ERGEBNIS.md` vermerken. **Diese Entscheidung ist noch offen.**
+Das Original verlangt native Linux-x86-64-Programme für einen NixOS-Rechner mit
+RTX 5090. Unser Testsystem ist ein Mac M3 Max mit 96 GB. Deshalb ist die Aufgabe auf
+macOS umgestellt (Spezifikation `v1.1-mac`). Geändert sind nur die Teile, die von der
+Plattform abhängen. Thema, Größen, Laufzeit, Phasen, MORPH und alle anderen
+Anforderungen sind gleich.
+
+| Punkt | Original | Unser Test |
+|---|---|---|
+| Zielsystem | NixOS x86-64, RTX 5090 | macOS arm64, Apple M3 Max, 96 GB |
+| Programmformat | Linux-ELF | Mach-O arm64, mindestens ad-hoc signiert, kein `.app`-Bundle, kein Rosetta |
+| Grafik | OpenGL 4.6, Vulkan, CUDA | Metal, OpenGL 4.1 |
+| Fenster | X11, Wayland, SDL, GLFW | Cocoa / AppKit |
+| Audio | PipeWire, ALSA, SDL | Core Audio, AudioToolbox |
+| Selbst entpacken | im Speicher oder anonyme In-Memory-Datei | nur im Speicher (z. B. `MAP_JIT`), nichts auf die Platte schreiben |
+| Anzeige | 1920×1080 | Rendern in 1920×1080 Pixeln, Vollbild skaliert oder als Fenster |
+| Build-Werkzeuge | gcc, Nix | Apple clang (Xcode Command Line Tools), kein Homebrew vorausgesetzt |
+
+Zwei Regeln sind ausdrücklicher als im Original, weil es auf dem Mac nahe liegt, sie zu umgehen:
+Systemfonts (Core Text, `NSString`-Zeichnen) gelten als Inhalt, MORPH muss also selbst
+erzeugt werden, und Systemprogramme wie `afplay`, `say`, `open` oder `osascript` dürfen
+nicht gestartet werden.
+
+Die Signatur zählt zur Dateigröße. Wer auf exakte Größe auffüllt, muss das also vor dem
+Signieren tun oder die Signatur einrechnen. Das ist Teil der Aufgabe.
 
 ## Bewertung
 
 Das Original-Repo legt die Rohläufe offen, aber kein Punkteschema fest. Bis wir eins
-festlegen, gilt dieser Vorschlag, abgeleitet aus den Pflichtpunkten von `SPEC.md`:
+festlegen, gilt dieser Vorschlag, abgeleitet aus den Pflichtpunkten unserer `SPEC.md`:
 
 **Pflichtpunkte (je Programm, bestanden oder nicht):**
 
 | Nr. | Prüfung |
 |---|---|
 | P1 | Datei existiert und hat exakt die verlangte Größe |
-| P2 | Natives ELF, kein Skript, kein Wrapper, kein externer Entpacker |
+| P2 | Natives Mach-O arm64, signiert, startet ohne Rosetta, kein Skript, kein Wrapper, kein externer Entpacker |
 | P3 | Startet ohne Eingabe, zeigt Bild und gibt Ton aus |
 | P4 | Laufzeit 50 bis 70 Sekunden, endet von selbst mit Exit-Code 0 |
 | P5 | Escape beendet sauber |
@@ -122,6 +150,10 @@ Pro Modell gibt es einen Ordner unter [`ergebnisse/`](ergebnisse/), benannt nach
 Modell (Schreibweise wie im Original-Repo: Bindestriche statt Leerzeichen,
 z. B. `GLM-5.3`). Läuft dasselbe Modell in mehreren Harnesses, kommt der Harness
 dazu, z. B. `GLM-5.3-Flash-zcode` und `GLM-5.3-Flash-pi`.
+
+Prüfhilfen auf dem Mac: `stat -f %z <datei>` (Größe), `file <datei>` und
+`codesign -dv <datei>` (Format, Signatur), `/usr/bin/time -p ./<datei>` (Laufzeit),
+`otool -L <datei>` (genutzte Bibliotheken).
 
 ```
 ergebnisse/

@@ -1,6 +1,6 @@
 # MorphDemo
 
-*Specification v1.1 (2026-09-23): adds `ENVIRONMENT.json`, working conditions and the self-decompression clarification. The creative task and all output requirements are unchanged.*
+*Specification v1.1-mac (2026-10-28): based on MorphDemo v1.1 (2026-09-23), adapted to an Apple Silicon Mac running macOS. Only the platform-specific parts changed (runtime environment, executable format, self-decompression, code signing). The creative task and all other output requirements are unchanged.*
 
 Create three original real-time audiovisual demos under strict executable-size constraints.
 
@@ -10,23 +10,21 @@ All three demos belong to the same project and must be completed in this run.
 
 The final programs will be run on the following system:
 
-- NixOS, x86-64
-- NVIDIA GeForce RTX 5090
-- NVIDIA graphics driver available
-- CUDA available
-- OpenGL and Vulkan available
-- Audio output available through the system audio stack
-- 1920×1080 display target
+- macOS on Apple Silicon (arm64), Apple M3 Max
+- Integrated Apple GPU, unified memory (96 GB)
+- Metal available; OpenGL 4.1 (deprecated by Apple, but still shipped) available
+- Audio output available through Core Audio (AudioToolbox / AudioUnit)
+- 1920×1080 render target: render at 1920×1080 pixels and show it full-screen on the main display (scaled to fit) or in a window; the built-in display uses Retina scaling, so a window of 1920×1080 points may not fit on screen
 
-You may use system libraries that are already present in the supplied environment.
+You may use system libraries and frameworks that are already present in the supplied environment (for example Cocoa/AppKit, Metal, MetalKit, OpenGL, CoreGraphics, CoreAudio, AudioToolbox, libSystem).
 
-The supplied `ENVIRONMENT.json` lists the actual loader, runtime libraries, display setup and build tools of this machine. Read it instead of guessing.
+The supplied `ENVIRONMENT.json` lists the actual OS version, hardware, frameworks and build tools of this machine. Read it instead of guessing.
 
 The final programs must not require downloading, installing, or shipping additional runtime dependencies.
 
 ## Required executables
 
-Produce exactly these three native Linux executables:
+Produce exactly these three native macOS arm64 executables (Mach-O, not app bundles):
 
 - `morphdemo-64k` — exactly **65,536 bytes**
 - `morphdemo-16k` — exactly **16,384 bytes**
@@ -36,11 +34,13 @@ The sizes above are exact file sizes on disk, not upper limits.
 
 Every executable must independently satisfy the complete task described below.
 
-Padding is allowed if necessary to reach the exact required file size, but each executable itself must remain a valid runnable native Linux executable.
+Padding is allowed if necessary to reach the exact required file size, but each executable itself must remain a valid runnable native macOS arm64 executable.
 
-The final artifacts may not be shell scripts, interpreted source files, bytecode wrappers, archives, launchers, or thin wrappers around another program that performs the production.
+The final artifacts may not be shell scripts, interpreted source files, bytecode wrappers, archives, launchers, `.app` bundles, or thin wrappers around another program that performs the production.
 
-Self-decompression is allowed: an executable may contain its own compressed code and data and unpack it at runtime, in memory or into an anonymous in-memory file that it then executes. The unpacking must be done by code inside the executable itself. Invoking an external unpacker, shell or other program on the system is not allowed.
+Apple Silicon only runs signed code. Each executable must start directly from a terminal on this machine, which in practice means it carries at least an ad-hoc code signature (`codesign -s -`). The signature is part of the file and counts toward its exact size. It must not depend on Rosetta 2 (no x86-64 code).
+
+Self-decompression is allowed: an executable may contain its own compressed code and data and unpack it at runtime in memory (for example into memory mapped with `MAP_JIT`) and execute it there. The unpacking must be done by code inside the executable itself. Invoking an external unpacker, shell or other program on the system is not allowed, and so is writing an unpacked program to disk and executing it.
 
 ## Working conditions
 
@@ -109,7 +109,7 @@ Do not rely on external production assets, including:
 - downloaded content;
 - network resources.
 
-Do not read production content from the filesystem at runtime.
+Do not read production content from the filesystem at runtime. System fonts are production content too: rendering the word MORPH with a system font (for example through Core Text or `NSString` drawing) is not allowed; generate the letters yourself.
 
 Compact data embedded directly inside the executable is allowed.
 
@@ -126,7 +126,7 @@ Each executable must:
 - produce audible output;
 - run the intended sequence from beginning to end;
 - avoid network access;
-- avoid spawning or delegating the production to another renderer, media player, browser, interpreter, or demo executable;
+- avoid spawning or delegating the production to another renderer, media player, browser, interpreter, or demo executable (this includes `afplay`, `say`, `open` and `osascript`);
 - exit cleanly when finished.
 
 A short initialization or precalculation phase is acceptable, but it should not replace the real-time nature of the production.
@@ -139,7 +139,7 @@ Produce:
 2. `morphdemo-16k`, exactly 16,384 bytes;
 3. `morphdemo-4k`, exactly 4,096 bytes;
 4. complete source code for all three executables;
-5. everything required to rebuild all three from source using the tools available in the supplied environment;
+5. everything required to rebuild all three from source using the tools available in the supplied environment (do not assume Homebrew or other package managers unless `ENVIRONMENT.json` lists them);
 6. a short `README.md` containing the exact build commands and a brief description of the implementation.
 
 Only the three final executable files are subject to their exact size requirements.
